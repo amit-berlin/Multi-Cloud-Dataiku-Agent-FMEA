@@ -47,67 +47,106 @@ if demo != "--None--":
 
 # --- Multi-Agent Simulation Functions ---
 def cloud_architecture_agent():
-    """Simulate Cloud Architecture Diagram"""
+    """Simulate enterprise Cloud Architecture Diagram including services, CI/CD, ML/Dataiku, security"""
     G = nx.DiGraph()
+    # Entry
     G.add_node("Cloud Entry")
+    
+    # Services
     for i in range(num_services):
         G.add_node(f"Service_{i+1}")
         G.add_edge("Cloud Entry", f"Service_{i+1}")
+    
+    # ML/Dataiku pipeline nodes
     G.add_node("Dataiku Pipeline")
     G.add_edge("Cloud Entry", "Dataiku Pipeline")
-    G.add_node("ML/AI")
-    G.add_edge("Dataiku Pipeline", "ML/AI")
-    G.add_node("CI/CD Pipeline")
-    G.add_edge("ML/AI", "CI/CD Pipeline")
-    G.add_node("Security Layer")
-    G.add_edge("CI/CD Pipeline", "Security Layer")
+    G.add_node("Data Ingestion")
+    G.add_edge("Dataiku Pipeline", "Data Ingestion")
+    G.add_node("Feature Engineering")
+    G.add_edge("Dataiku Pipeline", "Feature Engineering")
+    G.add_node("Model Training")
+    G.add_edge("Feature Engineering", "Model Training")
+    G.add_node("Model Deployment")
+    G.add_edge("Model Training", "Model Deployment")
+    G.add_node("Model Monitoring")
+    G.add_edge("Model Deployment", "Model Monitoring")
+    
+    # CI/CD nodes
+    G.add_node("CI/CD: Code Repo")
+    G.add_edge("Cloud Entry", "CI/CD: Code Repo")
+    G.add_node("CI/CD: Build & Test")
+    G.add_edge("CI/CD: Code Repo", "CI/CD: Build & Test")
+    G.add_node("CI/CD: Deploy")
+    G.add_edge("CI/CD: Build & Test", "CI/CD: Deploy")
+    G.add_node("CI/CD: Monitor & Rollback")
+    G.add_edge("CI/CD: Deploy", "CI/CD: Monitor & Rollback")
+    
+    # Security nodes
+    G.add_node("Security: Network")
+    G.add_edge("CI/CD: Monitor & Rollback", "Security: Network")
+    G.add_node("Security: Identity & Access")
+    G.add_edge("Security: Network", "Security: Identity & Access")
+    G.add_node("Security: Vulnerability Scan")
+    G.add_edge("Security: Identity & Access", "Security: Vulnerability Scan")
+    
+    # End user
     G.add_node("End User")
-    G.add_edge("Security Layer", "End User")
+    G.add_edge("Security: Vulnerability Scan", "End User")
     for i in range(num_services):
         G.add_edge(f"Service_{i+1}", "End User")
+    G.add_edge("Model Monitoring", "End User")
+    
     return G
 
 def render_diagram(G):
     """Render NetworkX diagram using matplotlib"""
-    pos = nx.spring_layout(G, seed=42)
-    plt.figure(figsize=(12,6))
+    pos = nx.spring_layout(G, seed=42, k=0.5)
+    plt.figure(figsize=(14,7))
     nx.draw(G, pos, with_labels=True, node_size=2500, node_color='skyblue',
-            font_size=10, font_weight='bold', arrowsize=20)
+            font_size=9, font_weight='bold', arrowsize=20)
     st.pyplot(plt)
 
 def generate_explanation():
-    """Generate textual explanation simulating architect reasoning"""
+    """Generate textual explanation simulating enterprise architect reasoning"""
     explanation = f"""
-**Cloud Architecture Explanation**
+**Cloud Architecture Explanation – Simulated Enterprise Experience**
 
-1. **Cloud Platforms:** Azure + GCP selected for scalability and flexibility.
-2. **Services:** {num_services} services deployed; {'Containers heavily used' if use_containers>5 else 'Minimal container usage'}.
-3. **Serverless Functions:** {'High usage' if serverless_ratio>5 else 'Moderate usage'} for cost optimization.
-4. **ML Workflows:** Dataiku integration level {dataiku_integration}/10 for automated ML pipelines.
-5. **Security:** Security compliance level {security_level}/10 (simulated). For real checks, integrate Wiz/Qualys/OpenSCAP.
-6. **CI/CD Automation:** Level {ci_cd_level}/10 to automate deployments.
+1. **Cloud Platforms:** Azure + GCP for scalable and resilient cloud solutions.
+2. **Services:** {num_services} services deployed; {'Heavy containerization (AKS/GKE)' if use_containers>5 else 'Minimal containerization'}.
+3. **Serverless Functions:** {'High usage' if serverless_ratio>5 else 'Moderate usage'} for cost efficiency.
+4. **ML/Dataiku Pipeline:** Integration level {dataiku_integration}/10; includes Data Ingestion, Feature Engineering, Model Training, Deployment, and Monitoring.
+5. **CI/CD Pipeline:** Level {ci_cd_level}/10; steps include Code Repo, Build & Test, Deploy, and Monitor & Rollback.
+6. **Security Remediation:** Security layers include Network, Identity & Access, and Vulnerability Scanning; compliance level {security_level}/10.
 7. **Cost Efficiency & Scalability:** Priorities set to {cost_efficiency}/10 and {scalability}/10.
-8. **AI Integration:** LLM-based AI level {ai_integration}/10 (simulation). For real AI, integrate Vertex AI / Azure OpenAI.
+8. **AI Integration:** LLM-based AI level {ai_integration}/10 (simulated). For production, integrate Vertex AI / Azure OpenAI.
+9. **Enterprise Simulation:** This MVP simulates hands-on experience in cloud architecture, CI/CD, ML workflows, and security remediation.
 
-**Note:** This is a **lightweight MVP**. For production-ready architecture, integrate real APIs: Dataiku API, Terraform, Azure/GCP SDKs, and Security tools.
+**Note:** Lightweight MVP for demonstration. Production implementations require real APIs: Dataiku, Terraform, Azure/GCP SDKs, and security tools.
 """
     st.markdown(explanation)
 
 def generate_fmea():
-    """Generate FMEA table dynamically based on slider inputs"""
-    components = ["Service", "Dataiku Pipeline", "ML/AI", "CI/CD Pipeline", "Security Layer"]
+    """Generate dynamic FMEA table based on input sliders and enterprise simulation"""
+    components = [
+        "Service", "Dataiku Pipeline", "Data Ingestion", "Feature Engineering", 
+        "Model Training", "Model Deployment", "Model Monitoring", 
+        "CI/CD Pipeline", "Security Layer"
+    ]
     failure_modes = [
-        "Service crash", 
-        "Pipeline failure", 
-        "Model drift", 
-        "Deployment error", 
-        "Misconfiguration"
+        "Service crash", "Pipeline failure", "Data ingestion errors", "Feature engineering errors",
+        "Model training errors", "Model deployment errors", "Model monitoring failures",
+        "CI/CD deployment error", "Security misconfiguration"
     ]
     
-    # Severity, Occurrence, Detection heuristics based on sliders
-    severity = [6 + int(use_containers/2), 7, 6 + int(ml_complexity/2), 8, 9 - int(security_level/2)]
-    occurrence = [5, 4 + int(dataiku_integration/2), 5 + int(ml_complexity/2), 4 + int(ci_cd_level/3), 3 + int(serverless_ratio/2)]
-    detection = [5 + int(ci_cd_level/3), 6 - int(dataiku_integration/3), 5, 4 + int(ci_cd_level/2), 5]
+    severity = [
+        6 + int(use_containers/2), 7, 6, 7, 7 + int(ml_complexity/2), 8, 6, 8, 9 - int(security_level/2)
+    ]
+    occurrence = [
+        5, 4 + int(dataiku_integration/2), 5, 5, 5 + int(ml_complexity/2), 4, 4, 4 + int(ci_cd_level/3), 3 + int(serverless_ratio/2)
+    ]
+    detection = [
+        5 + int(ci_cd_level/3), 6 - int(dataiku_integration/3), 5, 5, 5, 4 + int(ci_cd_level/2), 5, 4, 5
+    ]
     
     rpn = [s*o*d for s,o,d in zip(severity, occurrence, detection)]
     
@@ -122,11 +161,11 @@ def generate_fmea():
     return fmea_df
 
 # --- Main Display ---
-st.subheader("Generated Cloud Architecture Diagram")
+st.subheader("Generated Enterprise Cloud Architecture Diagram")
 G = cloud_architecture_agent()
 render_diagram(G)
 
-st.subheader("Architect Explanation")
+st.subheader("Architect Explanation – Enterprise Simulation")
 generate_explanation()
 
 st.subheader("FMEA Analysis (Real-time based on slider inputs)")
